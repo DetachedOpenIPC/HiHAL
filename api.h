@@ -107,6 +107,40 @@ extern "C" {
 /*
  * System Controller reference end
  */
+
+/*
+ * RTC reference
+ */
+    
+#define RTC_APB_BASE_ADDRESS   0x20060000
+    
+#define SPI_CLK_DIV_OFFSET  0x0000      // SPI clock ratio register
+#define SPI_RW_OFFSET       0x0004      // SPI read/write register
+#define CONVER_T_OFFSET     0x0080      // Temperature sensor measurement control register
+#define CRC_EN_OFFSET       0x0084      // Temperature sensor measurement CRC check enable register
+#define INT_MASK_OFFSET     0x0088      // Temperature sensor measurement interrupt mask register
+#define INT_CLEAR_OFFSET    0x008C      // Temperature sensor measurement interrupt clear register
+#define BUSY_OFFSET         0x0090      // Temperature sensor measurement status register
+#define INT_RAW_OFFSET      0x0094      // Raw temperature sensor measurement interrupt status register
+#define INT_TCAP_OFFSET     0x0098      // Temperature sensor measurement interrupt status register
+#define T_VALUE_OFFSET      0x009C      // Temperature sensor measurement value register
+#define FILTER_NUM_OFFSET   0x00A0      // Filter glitch width configuration register
+    
+#define SPI_CLK_DIV_REG  RTC_APB_BASE_ADDRESS + SPI_CLK_DIV_OFFSET
+#define SPI_RW_REG       RTC_APB_BASE_ADDRESS + SPI_RW_OFFSET
+#define CONVER_T_REG     RTC_APB_BASE_ADDRESS + CONVER_T_OFFSET
+#define CRC_EN_REG       RTC_APB_BASE_ADDRESS + CRC_EN_OFFSET
+#define INT_MASK_REG     RTC_APB_BASE_ADDRESS + INT_MASK_OFFSET
+#define INT_CLEAR_REG    RTC_APB_BASE_ADDRESS + INT_CLEAR_OFFSET
+#define BUSY_REG         RTC_APB_BASE_ADDRESS + BUSY_OFFSET
+#define INT_RAW_REG      RTC_APB_BASE_ADDRESS + INT_RAW_OFFSET
+#define INT_TCAP_REG     RTC_APB_BASE_ADDRESS + INT_TCAP_OFFSET
+#define T_VALUE_REG      RTC_APB_BASE_ADDRESS + T_VALUE_OFFSET
+#define FILTER_NUM_REG   RTC_APB_BASE_ADDRESS + FILTER_NUM_OFFSET
+           
+/*
+ * RTC reference end
+ */
     
 #define DEFAULT_MD_LEN 128
 
