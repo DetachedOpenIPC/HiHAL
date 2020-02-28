@@ -78,6 +78,36 @@ extern "C" {
  Watchdog reference end
  */
     
+/*
+ * System Controller reference
+ */
+
+#define SC_BASE_ADDRESS   0x20050000
+
+#define SC_CTRL_OFFSET      0x000       // System control register
+#define SC_SYSRES_OFFSET    0x004       // System soft reset register
+#define SOLFINT_OFFSET      0x001C      // Software interrupt register
+#define SC_LOCKEN_OFFSET    0x0044      // Key register lock register
+#define SYSSTAT_OFFSET      0x008C      // System status register (PLL_LOCK)
+#define SCSYSID0_OFFSET     0xEE0       // Chip ID register 0
+#define SCSYSID1_OFFSET     0xEE4       // Chip ID register 1
+#define SCSYSID2_OFFSET     0xEE8       // Chip ID register 2
+#define SCSYSID3_OFFSET     0xEEC       // Chip ID register 3
+    
+#define SC_CTRL_REG     SC_BASE_ADDRESS + SC_CTRL_OFFSET
+#define SC_SYSRES_REG   SC_BASE_ADDRESS + SC_SYSRES_OFFSET
+#define SOLFINT_REG     SC_BASE_ADDRESS + SOLFINT_OFFSET
+#define SC_LOCKEN_REG   SC_BASE_ADDRESS + SC_LOCKEN_OFFSET
+#define SYSSTAT_REG     SC_BASE_ADDRESS + SYSSTAT_OFFSET
+#define SCSYSID0_REG    SC_BASE_ADDRESS + SCSYSID0_OFFSET
+#define SCSYSID1_REG    SC_BASE_ADDRESS + SCSYSID1_OFFSET
+#define SCSYSID2_REG    SC_BASE_ADDRESS + SCSYSID2_OFFSET
+#define SCSYSID3_REG    SC_BASE_ADDRESS + SCSYSID3_OFFSET
+       
+/*
+ * System Controller reference end
+ */
+    
 #define DEFAULT_MD_LEN 128
 
 //#define HIMM_STRING // enable if you want use string reg address and values
@@ -147,6 +177,20 @@ HI_S32 refresh_watchdog(void) {
 
 /*
  * Watchdog HAL api end
+ */
+
+/*
+ * System Controller HAL api
+ */
+
+HI_S32 soft_reset_system(void) {   
+    himm_set(SC_LOCKEN_REG, REG_UNLOCK_VALUE);
+    himm_set(SC_SYSRES_REG, REG_LOCK_ANY_VALUE);
+    return 0;
+}
+
+/*
+ * System Controller HAL api end
  */
     
 #else
