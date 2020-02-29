@@ -35,10 +35,30 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    
+
 #include "hi_type.h"
-#include "memmap.h"
+#include "util.h"
+
+#define clear() printf("\033[H\033[J")
     
+//#define HISI_CPU_MODEL_3518CV100
+#define HISI_CPU_MODEL_3516CV300
+//#define HISI_CPU_MODEL_3516CV200
+
+#define HISI_CPU_NAME "3518CV100"
+
+#ifdef HISI_CPU_MODEL_3518CV100
+    #include "hi3518cv100.h"    
+#endif
+
+#ifdef HISI_CPU_MODEL_3516CV300
+    #include "hi3516cv300.h"    
+#endif
+
+#ifdef HISI_CPU_MODEL_3516CV200
+    #include "hi3516cv200.h"    
+#endif
+
 #ifndef MHZ
 #define MHZ (1000*1000)
 #endif
@@ -141,37 +161,70 @@ extern "C" {
 /*
  * RTC reference end
  */
-    
-#define DEFAULT_MD_LEN 128
 
-//#define HIMM_STRING // enable if you want use string reg address and values
-    
-#ifndef HIMM_STRING
-    
-HI_S32 himm_set(HI_U32 reg_address, HI_U32 value) {
-    HI_U32 ulOld;
-    HI_VOID* pMem  = HI_NULL;
-    
-    pMem = memmap(reg_address, DEFAULT_MD_LEN);
-    ulOld = *(HI_U32*)pMem;
-    *(HI_U32*)pMem = value;
-#ifdef DEBUG
-    printf("0x%08lX: 0x%08lX --> 0x%08lX \n", reg_address, ulOld, value);
-#endif
-    return 0;
-}
+/*
+ * GPIO reference
+ */
 
-HI_S32 himm_get(HI_U32 reg_address) {
-    HI_U32 ulOld;
-    HI_VOID* pMem  = HI_NULL;
-    
-    pMem = memmap(reg_address, DEFAULT_MD_LEN);
-    ulOld = *(HI_U32*)pMem;
-#ifdef DEBUG
-    printf("0x%08lX: 0x%08lX\n", reg_address, ulOld);
-#endif
-    return ulOld;
-}
+#define GPIO0_BASE_ADDRESS      0x20140000
+#define GPIO1_BASE_ADDRESS      0x20150000
+#define GPIO2_BASE_ADDRESS      0x20160000
+#define GPIO3_BASE_ADDRESS      0x20170000
+#define GPIO4_BASE_ADDRESS      0x20180000
+#define GPIO5_BASE_ADDRESS      0x20190000
+#define GPIO6_BASE_ADDRESS      0x201A0000
+#define GPIO7_BASE_ADDRESS      0x201B0000
+#define GPIO8_BASE_ADDRESS      0x201C0000
+#define GPIO9_BASE_ADDRESS      0x201D0000
+#define GPIO10_BASE_ADDRESS     0x201E0000
+#define GPIO11_BASE_ADDRESS     0x201F0000
+
+// Register address of GPIOn = GPIOn base address + Offset address of the register
+// The value of n ranges from 0 to 11.
+
+/*  
+ *  Mask for select gpio pins
+ *  --------------------------------------------------------------------------------
+ *  |  bits  | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+ *  |--------|----|----|----|----|----|----|---|---|---|---|---|---|---|---|---|---|
+ *  |  gpio  |  x |  x |  x |  x |  x |  x | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 | x | x |
+ *  |--------|----|----|----|----|----|----|---|---|---|---|---|---|---|---|---|---|
+ *  |  0x3FC |  0 |  0 |  0 |  0 |  0 |  0 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | 0 | example select all pins            (0b0000001111111100)
+ *  |  0x200 |  0 |  0 |  0 |  0 |  0 |  0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | example select only 7 gpio pin     (0b0000001000000000)
+ *  |  0x244 |  0 |  0 |  0 |  0 |  0 |  0 | 1 | 0 | 0 | 1 | 0 | 0 | 0 | 1 | 0 | 0 | example select 7, 4, 0 gpio pins   (0b0000001001000100)
+ *  |  0x000 |  0 |  0 |  0 |  0 |  0 |  0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | example deselect all gpio pin      (0b0000000000000000)
+ *  -------------------------------------------------------------------------------- 
+*/
+
+#define GPIO_DATA_MASK_ALL_PINS_OFFSET  0x3FC       // GPIO data register 0x3FC (0b11_1111_1100) mask
+#define GPIO_DATA_MASK_NON_PINS_OFFSET  0x000       // GPIO data register 0x000 (0b00_0000_0000) mask
+#define GPIO_DIR_OFFSET                 0x400       // GPIO direction control register
+#define GPIO_IS_OFFSET                  0x404       // GPIO interrupt trigger register
+#define GPIO_IBE_OFFSET                 0x408       // GPIO interrupt dual-edge trigger register
+#define GPIO_IEV_OFFSET                 0x40C       // GPIO interrupt trigger event register
+#define GPIO_IE_OFFSET                  0x410       // GPIO interrupt mask register 
+#define GPIO_RIS_OFFSET                 0x414       // GPIO raw interrupt status register
+#define GPIO_MIS_OFFSET                 0x418       // GPIO masked interrupt status register
+#define GPIO_IC_OFFSET                  0x41C       // GPIO interrupt clear register
+
+#define SPI_CLK_DIV_REG  RTC_APB_BASE_ADDRESS + SPI_CLK_DIV_OFFSET
+
+#define GPIO_DATA_REG (x)     GPIO##x##_BASE_ADDRESS + GPIO_DATA_OFFSET   // x - gpiochip number
+#define GPIO_DIR_REG  (x)     GPIO##x##_BASE_ADDRESS + GPIO_DIR_OFFSET    // x - gpiochip number
+#define GPIO_IS_REG   (x)     GPIO##x##_BASE_ADDRESS + GPIO_IS_OFFSET     // x - gpiochip number
+#define GPIO_IBE_REG  (x)     GPIO##x##_BASE_ADDRESS + GPIO_IBE_OFFSET    // x - gpiochip number
+#define GPIO_IEV_REG  (x)     GPIO##x##_BASE_ADDRESS + GPIO_IEV_OFFSET    // x - gpiochip number
+#define GPIO_IE_REG   (x)     GPIO##x##_BASE_ADDRESS + GPIO_IE_OFFSET     // x - gpiochip number
+#define GPIO_RIS_REG  (x)     GPIO##x##_BASE_ADDRESS + GPIO_RIS_OFFSET    // x - gpiochip number
+#define GPIO_MIS_REG  (x)     GPIO##x##_BASE_ADDRESS + GPIO_MIS_OFFSET    // x - gpiochip number
+#define GPIO_IC_REG   (x)     GPIO##x##_BASE_ADDRESS + GPIO_IC_OFFSET     // x - gpiochip number
+
+/*
+ * GPIO reference end
+ */
+
+
+
 
 /*
  * Watchdog HAL api
@@ -227,142 +280,7 @@ HI_S32 soft_reset_system(void) {
  * System Controller HAL api end
  */
     
-#else
 
-#define ASC2NUM(ch) (ch - '0')
-#define HEXASC2NUM(ch) (ch - 'A' + 10)
-
-HI_S32 atoulx(char* str, HI_U32* pulValue)
-{
-    HI_U32   ulResult=0;
-    char ch;
-
-    while (*str) {
-        ch=toupper(*str);
-        if (isdigit(ch) || ((ch >= 'A') && (ch <= 'F' )))
-        {
-            if (ulResult < 0x10000000)
-            {
-                ulResult = (ulResult << 4) + ((ch<='9')?(ASC2NUM(ch)):(HEXASC2NUM(ch)));
-            }
-            else
-            {
-                *pulValue=ulResult;
-                return HI_FAILURE;
-            }
-        }
-        else
-        {
-            *pulValue=ulResult;
-            return HI_FAILURE;
-        }
-        str++;
-    }
-    
-    *pulValue=ulResult;
-    return HI_SUCCESS;
-}
-    
-HI_S32 atoul(char* str, HI_U32* pulValue)
-{
-    HI_U32 ulResult=0;
-
-    while (*str) {
-        if (isdigit((int)*str)) {
-            /*×îŽóÖ§³Öµœ0xFFFFFFFF(4294967295), 
-               X * 10 + (*str)-48 <= 4294967295
-               ËùÒÔ£¬ X = 429496729 */
-            if ((ulResult<429496729) || ((ulResult==429496729) && (*str<'6')))
-            {
-                ulResult = ulResult*10 + (*str)-48;
-            }
-            else
-            {
-                *pulValue = ulResult;
-                return HI_FAILURE;
-            }
-        }
-        else
-        {
-            *pulValue=ulResult;
-            return HI_FAILURE;
-        }
-        str++;
-    }
-    *pulValue=ulResult;
-    return HI_SUCCESS;
-}
-    
-HI_S32 StrToNumber(char* str , HI_U32* pulValue)
-{
-    if ( *str == '0' && (*(str+1) == 'x' || *(str+1) == 'X') )
-    {
-        if (*(str+2) == '\0')
-        {
-            return HI_FAILURE;
-        }
-        else
-        {
-            return atoulx(str+2, pulValue);
-        }
-    }
-    else
-    {
-        return atoul(str,pulValue);
-    }
-}
-    
-HI_S32 himm_set(char* reg, char* value)
-{
-    HI_U32 ulAddr = 0;
-    HI_U32 ulOld, ulNew;
-    char strNew[16];
-    HI_VOID* pMem  = HI_NULL;
-    
-    if ((reg != HI_NULL) && (reg[0] == '\0')) {
-        printf("char array is empty\n");
-        return -1;
-    }
-    
-    if( StrToNumber(reg, &ulAddr) == HI_SUCCESS) {    
-        pMem = memmap(ulAddr, DEFAULT_MD_LEN);
-        ulOld = *(HI_U32*)pMem;
-        if (StrToNumber(value, &ulNew) == HI_SUCCESS) {
-            *(HI_U32*)pMem = ulNew;
-            printf("%s: 0x%08lX --> 0x%08lX \n", reg, ulOld, ulNew);
-        } else {
-            printf("Input Error\n");
-        }
-    } else {
-        printf("Please input address like 0x12345\n");
-    }
-    
-    return 0;
-}
-
-HI_S32 himm_get(char* reg)
-{
-    HI_U32 ulAddr = 0;
-    HI_U32 ulOld, ulNew;
-    char strNew[16];
-    HI_VOID* pMem  = HI_NULL;
-    
-    if ((reg != HI_NULL) && (reg[0] == '\0')) {
-        printf("char array is empty\n");
-        return -1;
-    }
-        if( StrToNumber(reg, &ulAddr) == HI_SUCCESS) {    
-            pMem = memmap(ulAddr, DEFAULT_MD_LEN);
-            ulOld = *(HI_U32*)pMem;
-            /*hi_hexdump(STDOUT, pMem, DEFAULT_MD_LEN, 16);*/
-            printf("%s: 0x%08lX\n", reg, ulOld);
-        } else {
-            printf("Please input address like 0x12345\n");
-        }
-    return 0;
-}
-
-#endif
 
 #ifdef __cplusplus
 }
