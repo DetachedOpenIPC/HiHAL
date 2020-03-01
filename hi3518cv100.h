@@ -36,7 +36,56 @@
 extern "C" {
 #endif
 
+/*
+ * System Controller reference
+ */
 
+#define SC_BASE_ADDRESS   0x20050000
+
+#define SC_IMCTRL_OFFSET    0x0008      // Interrupt mode control register
+#define SC_IMSTAT_OFFSET    0x000C      // Interrupt mode status register
+#define SC_XTALCTRL_OFFSET  0x0010      // Crystal oscillator control register
+#define SC_PLLCTRL_OFFSET   0x0010      // PLL control register
+
+#define SC_IMCTRL_REG       SC_BASE_ADDRESS + SC_IMCTRL_OFFSET
+#define SC_IMSTAT_REG       SC_BASE_ADDRESS + SC_IMSTAT_OFFSET
+#define SC_XTALCTRL_REG     SC_BASE_ADDRESS + SC_XTALCTRL_OFFSET
+#define SC_PLLCTRL_REG      SC_BASE_ADDRESS + SC_PLLCTRL_OFFSET
+
+/*
+ * System Controller reference end
+ */
+
+/*
+ * Watchdog reference
+ */
+
+#define WDG_BASE_ADDRESS        0x20040000
+
+/*
+ * Watchdog reference end
+ */
+
+int setup_temperature_sensor(int loop, int period_ms, int overflow, int underflow) {
+#ifdef DEBUG
+    printf("setup_temperature_sensor not supported\n");
+#endif
+    return 0;
+}
+
+float get_single_temperature(void) {
+#ifdef DEBUG
+    printf("get_single_temperature not supported\n");
+#endif
+    return 0;
+}
+
+int get_cycle_temperature(float *temperature) {
+#ifdef DEBUG
+    printf("get_cycle_temperature not supported\n");
+#endif
+    return 0;
+}
 
 
 #ifdef __cplusplus

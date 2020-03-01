@@ -37,6 +37,20 @@ extern "C" {
 #endif
 
 /*
+ * System Controller reference
+ */
+
+#define SC_BASE_ADDRESS   0x20050000
+
+#define SOLFINT_OFFSET      0x001C      // Software interrupt register
+
+#define SOLFINT_REG      SC_BASE_ADDRESS + SOLFINT_OFFSET
+
+/*
+ * System Controller reference end
+ */
+
+/*
  * Peripheral Control Registers reference
  */
 
@@ -112,7 +126,7 @@ extern "C" {
  */
 
 /*
- * PMC Registers reference end
+ * Power management controller (PMC) Registers reference end
  */
 
 #define PMC_BASE_ADDRESS      0x20270000
@@ -142,10 +156,19 @@ extern "C" {
 #define PERI_PMC69_REG     PMC_BASE_ADDRESS + PERI_PMC69_OFFSET
 #define PERI_PMC70_REG     PMC_BASE_ADDRESS + PERI_PMC70_OFFSET
 #define PERI_PMC71_REG     PMC_BASE_ADDRESS + PERI_PMC71_OFFSET
-  
-  
+
 /*
- * PMC Registers reference end
+ * Power management controller (PMC) Registers reference end
+ */
+
+/*
+ * Watchdog reference
+ */
+
+#define WDG_BASE_ADDRESS        0x20040000
+
+/*
+ * Watchdog reference end
  */
 
 /*
@@ -180,7 +203,6 @@ int setup_temperature_sensor(int loop, int period_ms, int overflow, int underflo
 float get_single_temperature(void) {
     unsigned MASK = 0xFF;
     HI_U32 PMC69 = himm_get(PERI_PMC69_REG);
-    PMC69 &= MASK ;
     float temperature = TEMPERATURE((PMC69 & MASK));
     return temperature;
 }

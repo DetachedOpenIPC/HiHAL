@@ -37,6 +37,20 @@ extern "C" {
 #endif
 
 /*
+ * System Controller reference
+ */
+
+#define SC_BASE_ADDRESS   0x12020000
+
+#define SOLFINT_OFFSET      0x001C      // Software interrupt register
+
+#define SOLFINT_REG      SC_BASE_ADDRESS + SOLFINT_OFFSET
+
+/*
+ * System Controller reference end
+ */
+
+/*
  * Peripheral Control Registers reference
  */
 
@@ -123,6 +137,16 @@ extern "C" {
  */
 
 /*
+ * Watchdog reference
+ */
+
+#define WDG_BASE_ADDRESS        0x12080000
+
+/*
+ * Watchdog reference end
+ */
+
+/*
  * Peripheral Control HAL api
  */
 
@@ -154,8 +178,7 @@ int setup_temperature_sensor(int loop, int period_ms, int overflow, int underflo
 float get_single_temperature(void) {
     unsigned MASK = 0x3FF;
     HI_U32 CTRL41 = himm_get(MISC_CTRL41_REG);
-    CTRL41 &= MASK ;
-    float temperature = TEMPERATURE(CTRL41);
+    float temperature = TEMPERATURE((CTRL41 & MASK));
     return temperature;
 }
 
